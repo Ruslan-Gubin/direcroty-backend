@@ -52,7 +52,7 @@ class PostService {
             throw new Error('Не найден ID');
         }
         const post = await this.model
-            .findOne({ _id: id });
+            .findById(id);
         if (!post) {
             throw new Error('Пост не найден');
         }

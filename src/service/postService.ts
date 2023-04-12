@@ -70,9 +70,7 @@ class PostService {
     }
 
     const post = await this.model
-      .findOne({ _id: id })
-      // .findOneAndUpdate({ _id: id }, { $inc: { viewsCount: 1 } }, { returnDocument: 'after' })
-
+      .findById( id )
       if (!post) {
         throw new Error('Пост не найден');
     }
