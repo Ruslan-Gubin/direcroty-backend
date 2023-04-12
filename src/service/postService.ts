@@ -81,7 +81,7 @@ class PostService {
 
   async remove( { id, images}: {id: string, images: string[]}): Promise<any> {
 
-    try {
+    try { 
       for (let imgPublickId of images) {
         if (imgPublickId) {
           await cloudinary.uploader.destroy(imgPublickId); // delete image cloudinary

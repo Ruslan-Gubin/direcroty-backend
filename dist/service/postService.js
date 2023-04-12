@@ -72,27 +72,9 @@ class PostService {
         }
     }
     async update(body) {
-        const postId = body.id;
-        const prevPost = await this.model.findById(postId);
-        const prevImage = prevPost === null || prevPost === void 0 ? void 0 : prevPost.image;
-        if ((prevImage === null || prevImage === void 0 ? void 0 : prevImage.url) === body.image) {
-            return await this.model.updateOne({ _id: postId }, { ...body, image: prevImage });
-        }
-        else {
-            const imgId = await (prevPost === null || prevPost === void 0 ? void 0 : prevPost.image.public_id);
-            if (imgId) {
-                await cloudinary.uploader.destroy(imgId);
-            }
-            const newImage = body.image;
-            const result = await cloudinary.uploader.upload(newImage, {
-                folder: 'PostsDirectory',
-                fetch_format: 'auto',
-            });
-            return await this.model.updateOne({ _id: postId }, {
-                ...body,
-                image: { public_id: result.public_id, url: result.secure_url },
-            });
-        }
+        return await this.model.updateOne({
+            ...body,
+        });
     }
 }
 export const postService = new PostService(postModel);
