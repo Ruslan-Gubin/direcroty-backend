@@ -11,6 +11,7 @@ class PostController {
     async getCategoryPosts(req, res) {
         const category = req.query.category;
         const searchValue = req.query.searchValue;
+        console.log(category, searchValue);
         await postService
             .getAllPost(category, searchValue)
             .then((posts) => res.status(200).json(posts))

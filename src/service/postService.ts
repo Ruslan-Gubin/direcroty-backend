@@ -12,12 +12,10 @@ class PostService {
   constructor(private readonly model: Model<types.IPost>) {}
 
   async getAllPost(category: string, searchValue: string): Promise<types.IPost[]> {
-    if (!searchValue) {
-      return await this.model.find({category: { $regex: `${category}`, $options: 'i'}})
-    }
+    console.log('getAllPost:', category, searchValue)
 
     return await this.model
-      .find({ title: { $regex: `${searchValue}`, $options: 'i' }, category: { $regex: `${category}`, $options: 'i'} })
+      .find({ title: { $regex: `${searchValue}`, $options: 'ig' }, category })
       .sort({ createdAt: -1 })
       .exec();
   }
@@ -94,32 +92,32 @@ class PostService {
   }
   
   async update(body: types.UpdatePostBody): Promise<UpdateWriteOpResult> {
-    // const postId = body.id;
-    // const prevPost = await this.model.findById(postId);
-    // const prevImage = prevPost?.image;
+    const postId = body.id;
+    const prevPost = await this.model.findById(postId);
+    const prevImage = prevPost?.image;
     
-    // if (prevImage[0].url === body.image) {
-    //   return await this.model.updateOne({ _id: postId }, { ...body, image: prevImage });
-    // } else {
-    //   const imgId = await prevPost?.image.public_id;
-    //   if (imgId) {
-    //     await cloudinary.uploader.destroy(imgId);
-    //   }
+    if (prevImage[0].url === body.image) {
+      return await this.model.updateOne({ _id: postId }, { ...body, image: prevImage });
+    } else {
+      const imgId = await prevPost?.image.public_id;
+      if (imgId) {
+        await cloudinary.uploader.destroy(imgId);
+      }
       
-    //   const newImage = body.image;
-    //   const result = await cloudinary.uploader.upload(newImage, {
-    //     folder: 'PostsDirectory',
-    //     fetch_format: 'auto',
-    //   });
+      const newImage = body.image;
+      const result = await cloudinary.uploader.upload(newImage, {
+        folder: 'PostsDirectory',
+        fetch_format: 'auto',
+      });
 
       return await this.model.updateOne(
-        // { _id: postId },
+        { _id: postId },
         {
           ...body,
-          // image: { public_id: result.public_id, url: result.secure_url },
+          image: { public_id: result.public_id, url: result.secure_url },
         },
       );
-    // }
+    }
   }
 
 

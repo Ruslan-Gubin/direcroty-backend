@@ -17,7 +17,8 @@ class PostController {
     
     async getCategoryPosts(req: IRequestQuery<{category: string, searchValue: string}>, res: Response<types.IPost[]>) {
       const category = req.query.category
-      const searchValue = req.query.searchValue  
+      const searchValue = req.query.searchValue
+      console.log(category, searchValue)  
 
       await postService
       .getAllPost(category, searchValue) 
