@@ -5,8 +5,8 @@ import { postCreateValedation } from "../validations/postValidation.js";
 const router = express.Router();
 router.route('/api/post/:id')
     .get(postController.getOnePost)
-    .delete(postController.deletePost)
-    .patch(postCreateValedation, handleValidationErrors, postController.updatePost);
+    .delete(postController.deletePost);
+router.patch('/api/post-update', postCreateValedation, handleValidationErrors, postController.updatePost);
 router.route('/api/post')
     .get(postController.getCategoryPosts)
     .post(postCreateValedation, handleValidationErrors, postController.createPost);

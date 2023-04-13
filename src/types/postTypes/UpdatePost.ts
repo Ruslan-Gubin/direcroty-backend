@@ -3,8 +3,9 @@
 interface UpdatePostBody {
   text: string
   title: string
-  image: string
+  images: string[]
   id: string
+  category: string;
 }
 
 export type {UpdatePostBody}

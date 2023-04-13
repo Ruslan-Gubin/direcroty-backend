@@ -1,18 +1,18 @@
 interface IImage {
-  public_id: string
-  url: string
+  public_id: string;
+  url: string;
+  _id: string;
 }
-
 
 interface IPost {
   category: string;
   _id: string;
   title: string;
   text: string;
-  image: IImage[]
-  viewsCount: number
-  updatedAt: string
-  __v: number
+  image: IImage[];
+  viewsCount: number;
+  updatedAt: string;
+  __v: number;
 }
 
-export type {IPost}
+export type { IPost, IImage };

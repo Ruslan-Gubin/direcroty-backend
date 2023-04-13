@@ -11,7 +11,6 @@ class PostController {
     async getCategoryPosts(req, res) {
         const category = req.query.category;
         const searchValue = req.query.searchValue;
-        console.log(category, searchValue);
         await postService
             .getAllPost(category, searchValue)
             .then((posts) => res.status(200).json(posts))
@@ -47,7 +46,7 @@ class PostController {
         const body = req.body;
         await postService
             .update(body)
-            .then(() => res.status(200).json({ success: true }))
+            .then((post) => res.status(200).json(post))
             .catch((error) => handleError(res, error, 'Не удалось обновить статью'));
     }
 }

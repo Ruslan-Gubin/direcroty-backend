@@ -1,7 +1,7 @@
 import { Response, Request } from 'express';
 import { handleError } from '../utils/index.js';
 import { postService } from '../service/index.js';
-import { IRequestBody, IRequestParams, IRequestQuery } from '../types/IRequestRespons/index.js';
+import { IRequestBody, IRequestQuery } from '../types/IRequestRespons/index.js';
 import * as types from '../types/postTypes/index.js';
 
 
@@ -18,8 +18,6 @@ class PostController {
     async getCategoryPosts(req: IRequestQuery<{category: string, searchValue: string}>, res: Response<types.IPost[]>) {
       const category = req.query.category
       const searchValue = req.query.searchValue
-      console.log(category, searchValue)  
-
       await postService
       .getAllPost(category, searchValue) 
       .then((posts) => res.status(200).json(posts))
@@ -56,11 +54,11 @@ class PostController {
       .catch((error) => handleError(res, error.message, 'Не удалось удалить статью'));
     }
     
-    async updatePost(req: IRequestBody<types.UpdatePostBody>, res: Response<{ success: boolean }>) {
+    async updatePost(req: IRequestBody<types.UpdatePostBody>, res: Response<types.IPost>) {
       const body = req.body
       await postService
       .update(body)
-      .then(() => res.status(200).json({ success: true }))
+      .then((post) => res.status(200).json(post))
       .catch((error) => handleError(res, error, 'Не удалось обновить статью'));
     }
 

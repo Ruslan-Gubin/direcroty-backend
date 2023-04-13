@@ -6,9 +6,11 @@ class PostService {
         this.model = model;
     }
     async getAllPost(category, searchValue) {
-        console.log('getAllPost:', category, searchValue);
+        if (!searchValue) {
+            return await this.model.find({ category }).sort({ createdAt: -1 }).exec();
+        }
         return await this.model
-            .find({ title: { $regex: `${searchValue}`, $options: 'ig' }, category })
+            .find({ title: { $regex: `${searchValue}`, $options: 'i' }, category })
             .sort({ createdAt: -1 })
             .exec();
     }
@@ -49,8 +51,7 @@ class PostService {
         if (!id) {
             throw new Error('Не найден ID');
         }
-        const post = await this.model
-            .findById(id);
+        const post = await this.model.findById(id);
         if (!post) {
             throw new Error('Пост не найден');
         }
@@ -70,27 +71,53 @@ class PostService {
         }
     }
     async update(body) {
-        const postId = body.id;
-        const prevPost = await this.model.findById(postId);
-        const prevImage = prevPost === null || prevPost === void 0 ? void 0 : prevPost.image;
-        if (prevImage[0].url === body.image) {
-            return await this.model.updateOne({ _id: postId }, { ...body, image: prevImage });
+        const { category, id, images, text, title } = body;
+        const prevPost = await this.model.findById(id);
+        if (!prevPost) {
+            throw new Error('Not find Post');
         }
-        else {
-            const imgId = await (prevPost === null || prevPost === void 0 ? void 0 : prevPost.image.public_id);
-            if (imgId) {
-                await cloudinary.uploader.destroy(imgId);
+        const imageMap = {
+            prevImages: [],
+            newImages: [],
+            deleteImages: [],
+        };
+        images.forEach((img) => {
+            if (img.match('https://res.cloudinary')) {
+                const imgObj = prevPost.image.find((item) => item.url === img);
+                if (imgObj) {
+                    imageMap.prevImages.push(imgObj);
+                }
             }
-            const newImage = body.image;
-            const result = await cloudinary.uploader.upload(newImage, {
-                folder: 'PostsDirectory',
-                fetch_format: 'auto',
-            });
-            return await this.model.updateOne({ _id: postId }, {
-                ...body,
-                image: { public_id: result.public_id, url: result.secure_url },
-            });
+            else {
+                imageMap.newImages.push(img);
+            }
+        });
+        prevPost.image.forEach((img) => {
+            if (!imageMap.prevImages.map((item) => item.url).includes(img.url)) {
+                imageMap.deleteImages.push(img.public_id);
+            }
+        });
+        if (imageMap.deleteImages.length) {
+            for (const removeImg of imageMap.deleteImages) {
+                await cloudinary.uploader.destroy(removeImg);
+            }
         }
+        if (imageMap.newImages.length) {
+            for (const img of imageMap.newImages) {
+                const newImgObj = await cloudinaryImagesMethod(img, 'PostsDirectory');
+                imageMap.prevImages.push(newImgObj);
+            }
+        }
+        const updatePost = await this.model.findByIdAndUpdate(id, {
+            category,
+            text,
+            title,
+            image: imageMap.prevImages,
+        }, { returnDocument: 'after' });
+        if (!updatePost) {
+            throw new Error('Не удалось изменить данные');
+        }
+        return updatePost;
     }
 }
 export const postService = new PostService(postModel);
